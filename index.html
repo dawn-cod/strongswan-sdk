@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bootstrap demo</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <nav class="navbar bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img
+            src="/logos/strong-swan-logo.svg"
+            alt="Logo"
+            width="144"
+            height="24"
+            class="d-inline-block align-text-top"
+          />
+        </a>
+        A sdk for strongSwan, or you can call it just a GUI for that.
+      </div>
+    </nav>
+    <hr class="border border-danger border-2 opacity-50" />
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-4">
+          <label for="inputEmail4" class="form-label">本地ID</label>
+          <input
+            type="email"
+            class="form-control"
+            id="LocalID"
+            placeholder="url 或IP地址"
+          />
+        </div>
+        <div class="col-4 offset-md-2">
+          <label for="inputEmail4" class="form-label">对端ID</label>
+          <input
+            type="email"
+            class="form-control"
+            id="ClientID"
+            placeholder="url 或IP地址"
+          />
+        </div>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-4">
+          <label for="inputEmail4" class="form-label">本地IP</label>
+          <input
+            type="email"
+            class="form-control"
+            id="LocalIP"
+            placeholder="xxx.xxx.xxx.xxx"
+          />
+        </div>
+        <div class="col-4 offset-md-2">
+          <label for="inputEmail4" class="form-label">对端IP</label>
+          <input
+            type="email"
+            class="form-control"
+            id="ClientIP"
+            placeholder="xxx.xxx.xxx.xxx"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4 offset-md-1">
+          <label for="inputEmail4" class="form-label">重连间隔</label>
+          <input
+            type="email"
+            class="form-control"
+            id="reconnectGapSecond"
+            placeholder="单位为s"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-2 offset-md-5">
+          <button onclick="init()" class="btn btn-primary">保存设置</button>
+        </div>
+      </div>
+      <hr class="border border-danger border-1 opacity-50" />
+      <div class="row">
+        <label class="col-sm-1 col-form-label col-form-label-sm"
+          >启动时间</label
+        >
+        <div class="col-sm-5">
+          <input
+            class="form-control"
+            id="colFormLabel"
+            placeholder="hh:mm:ss"
+          />
+        </div>
+        <div class="col-sm-2 offset-sm-2">
+          <button type="submit" class="btn btn-primary">启动</button>
+        </div>
+      </div>
+      <hr class="border border-danger border-1 opacity-50" />
+      <div class="row">
+        <div class="col-8 offset-md-2">
+        <div class="card" >
+          <div class="card-body">
+            <h5 class="card-title">回显</h5>
+            <p id="msg" class="card-text">cli回显显示</p>
+            <a href="#" class="btn btn-primary">重置</a>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-/mhDoLbDldZc3qpsJHpLogda//BVZbgYuw6kof4u2FrCedxOtgRZDTHgHUhOCVim"
+      crossorigin="anonymous"
+    ></script>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "strongswan-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dawn-cod/strongswan-sdk.git"
+  },
+  "author": "dawn wu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dawn-cod/strongswan-sdk/issues"
+  },
+  "homepage": "https://github.com/dawn-cod/strongswan-sdk#readme",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.5",
+    "electron": "^23.1.1"
+  }
+}
