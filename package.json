@@ -19,6 +19,6 @@
   "homepage": "https://github.com/dawn-cod/strongswan-sdk#readme",
   "devDependencies": {
     "@electron-forge/cli": "^6.0.5",
-    "electron": "^23.1.1"
+    "electron": "^23.1.4"
   }
 }

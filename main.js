@@ -20,7 +20,6 @@ function createWindow() {
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 }
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -45,7 +44,7 @@ app.on('window-all-closed', function () {
 // code. You can also put them in separate files and require them here.
 
 const ipcMain = require('electron').ipcMain;
-
+const fs = require('fs')
 
 const exec = require('child_process').exec;
 const cmdPath = 'C:/';
@@ -86,3 +85,21 @@ ipcMain.on('init', async (e, msg) => {
     console.error(err);
   });
 });
+
+// 主进程
+// import { app, BrowserWindow, Menu, ipcMain } from 'electron';
+
+// ipcMain.on('asynchronous-message', function(event, arg) {
+//    // arg是从渲染进程返回来的数据
+//   console.log(arg);
+  
+//   // 这里是传给渲染进程的数据
+//   fs.readFile(path.join(__dirname,"../renderer/data/data.json"),"utf8",(err,data)=>{
+//   	if(err){
+// 		event.sender.send('asynchronous-reply', "读取失败");
+// 	}else{
+// 		event.sender.send('asynchronous-reply', data);
+// 	}
+    
+//   })
+// });
