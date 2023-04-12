@@ -16,7 +16,7 @@
       <div class="container-fluid">
         <a class="navbar-brand" href="#">
           <img
-            src="/logos/strong-swan-logo.svg"
+            src="logos/strong-swan-logo.svg"
             alt="Logo"
             width="144"
             height="24"
@@ -32,7 +32,6 @@
         <div class="col-4">
           <label for="inputEmail4" class="form-label">本地ID</label>
           <input
-            type="email"
             class="form-control"
             id="LocalID"
             placeholder="url 或IP地址"
@@ -41,7 +40,6 @@
         <div class="col-4 offset-md-2">
           <label for="inputEmail4" class="form-label">对端ID</label>
           <input
-            type="email"
             class="form-control"
             id="ClientID"
             placeholder="url 或IP地址"
@@ -52,7 +50,6 @@
         <div class="col-4">
           <label  class="form-label">本地IP</label>
           <input
-            type="email"
             class="form-control"
             id="LocalIP"
             placeholder="xxx.xxx.xxx.xxx"
@@ -61,7 +58,6 @@
         <div class="col-4 offset-md-2">
           <label class="form-label">对端IP</label>
           <input
-            type="email"
             class="form-control"
             id="ClientIP"
             placeholder="xxx.xxx.xxx.xxx"
@@ -72,7 +68,6 @@
         <div class="col-4 offset-md-1">
           <label class="form-label">重连间隔</label>
           <input
-            type="email"
             class="form-control"
             id="reconnectGapSecond"
             placeholder="单位为s"
@@ -81,7 +76,7 @@
       </div>
       <div class="row">
         <div class="col-2 offset-md-5">
-          <button onclick="init()" class="btn btn-primary">保存设置</button>
+          <button onclick="saveConfig()" class="btn btn-primary">保存设置</button>
         </div>
       </div>
       <hr class="border border-danger border-1 opacity-50" />
@@ -92,12 +87,12 @@
         <div class="col-sm-5">
           <input
             class="form-control"
-            id="colFormLabel"
+            id="startTime"
             placeholder="hh:mm:ss"
           />
         </div>
         <div class="col-sm-2 offset-sm-2">
-          <button onclick="init()" class="btn btn-primary">启动</button>
+          <button onclick="startStrongSwan()" class="btn btn-primary">启动</button>
         </div>
       </div>
       <hr class="border border-danger border-1 opacity-50" />

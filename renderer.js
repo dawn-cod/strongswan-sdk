@@ -7,7 +7,7 @@
  */
 
 const ipcRenderer = require('electron').ipcRenderer;
-
+//命令行消息回显
 var time;
 ipcRenderer.on('msg-reply', (e, msg) => {
     document.getElementById('msg').innerText = msg;
@@ -17,19 +17,37 @@ ipcRenderer.on('msg-reply', (e, msg) => {
     }, 3000);
 });
 
-function init() {
-    ipcRenderer.send('init', 'init');
+function saveConfig() {
+    //抓取用户输入
+    var InitConfig = {};
+    InitConfig.localID = document.getElementById("LocalID").value;
+    InitConfig.ClientID = document.getElementById("ClientID").value;
+    InitConfig.localIP = document.getElementById("LocalIP").value;
+    InitConfig.ClientIP = document.getElementById("ClientIP").value;
+    InitConfig.reconnectGapSecond = document.getElementById("reconnectGapSecond").value;
+    //用户输入判断（未完成）
+    //...
+    //...
+    ipcRenderer.send('save_config', InitConfig);
 }
 
-// 渲染进程
-// const ipcRenderer = require("electron").ipcRenderer;
-
 // 这里是接收主进程传递过来的参数，这里的on要对应主进程send过来的名字
-ipcRenderer.on("asynchronous-reply", function(event, arg) {
-// 这里的arg是从主线程请求的数据
-  	console.log("render+" + arg);
-});
+ipcRenderer.on("read-file-reply", function(event, arg) {
+    // 这里的arg是从主线程请求的数据
+          console.log("render+" + arg);
+    });
 
-// 这里的会传递回给主进程，这里的第一个参数需要对应着主进程里on注册事件的名字一致
-ipcRenderer.send("asynchronous-message", "传递回去ping");
+function fileRead() {
+    // 这里的会传递回给主进程，这里的第一个参数需要对应着主进程里on注册事件的名字一致
+    ipcRenderer.send("read-file-msg", "传递回去ping");
+}
 
+function startStrongSwan(){
+    let startTime = new Date();
+    timeString = document.getElementById("startTime").value;
+    const startTimeStr = timeString.split(":") ;
+    startTime.setHours(startTimeStr[0]);
+    startTime.setMinutes(startTimeStr[1]);
+    startTime.setSeconds(startTimeStr[2]);
+    ipcRenderer.send("startStrongSwan", startTime);
+}
