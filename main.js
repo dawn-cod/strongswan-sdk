@@ -46,10 +46,10 @@ app.on('window-all-closed', function () {
 const ipcMain = require('electron').ipcMain;
 const fs = require('fs')
 const exec = require('child_process').exec;
-const cmdPath = 'C:/';
+const cmdPath = '/home/edward/桌面/NJUPT-NEXUS';
 
 //该函数用于执行命令
-function execCommend(commend){
+function execCommend_Raw(commend){
   const runExec = new Promise((resolve, reject) => {
     let res = '', err = '';
     // 执行命令行，如果命令不需要路径，或就是项目根目录，则不需要cwd参数：
@@ -76,34 +76,30 @@ function execCommend(commend){
   });
   return runExec;
 }
-
-// ipcMain.on('init_msg', async (e, msg) => {
-//   console.log('main: ' + msg);
-//   runExec.then(({ err, res }) => {
-//     e.sender.send('msg-reply', res);
-//   }).catch((err) => {
-//     console.error(err);
-//   });
-// });
-
-ipcMain.on('save_config', async (e, msg) => {
-  console.log('main: ' + msg.localID);
-  var runExec = execCommend('echo baidu.com')
-  runExec.then(({ err, res }) => {
+//在execCommend_Raw的基础上添加了回显和报错
+function execCommend(commend){
+  var runExec_start = execCommend_Raw(commend)
+  runExec_start.then(({ err, res }) => {
     e.sender.send('msg-reply', res);
   }).catch((err) => {
     console.error(err);
   });
+  return runExec_start
+}
+//保存配置信息至本地
+ipcMain.on('save_config', async (e, msg) => {
+  console.log('main: ' + msg.localID);
+
 
 });
 
-//文件读写
+//文件读写（测试）
 ipcMain.on('read-file-msg', function(event, arg) {
   // arg是从渲染进程返回来的数据
   console.log(arg);
   // 这里是传给渲染进程的数据
   fs.readFile(path.join(__dirname,"./test.txt"),"utf8",(err,data)=>{
-  	if(err){
+  if(err){
 		event.sender.send('read-file-reply', "Failure occurs when reading file");
 	}else{
 		event.sender.send('read-file-reply', data);
@@ -113,11 +109,15 @@ ipcMain.on('read-file-msg', function(event, arg) {
 
 //启动StrongSwan
 ipcMain.on('startStrongSwan', async (event, startTime) => {
+  console.log('starttime=', startTime);
   if (startTime - new Date() < 0){
     console.log("输入时间早于当前时间！")
   }
+  // 到规定时间后启动strongSwan
+  execCommend('sudo ipsec start');
+  execCommend('sudo swanctl --load-all');
   setTimeout(() => {
-    // 到规定时间后启动strongSwan
-
-  }, startTime - new Date())
+    execCommend('sudo ipsec up h2h');
+    }, startTime - new Date())
 })
+

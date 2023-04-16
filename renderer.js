@@ -7,7 +7,8 @@
  */
 
 const ipcRenderer = require('electron').ipcRenderer;
-//命令行消息回显
+
+//下一段仅用于测试回显
 var time;
 ipcRenderer.on('msg-reply', (e, msg) => {
     document.getElementById('msg').innerText = msg;
