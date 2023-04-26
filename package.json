@@ -1,11 +1,14 @@
 {
   "name": "strongswan-sdk",
   "version": "1.0.0",
-  "description": "",
+  "description": "an unfinished version",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "build": "electron-builder"
   },
   "repository": {
     "type": "git",
@@ -18,13 +21,63 @@
   },
   "homepage": "https://github.com/dawn-cod/strongswan-sdk#readme",
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.5",
+    "@electron-forge/cli": "^6.1.1",
+    "@electron-forge/maker-deb": "^6.1.1",
+    "@electron-forge/maker-rpm": "^6.1.1",
+    "@electron-forge/maker-squirrel": "^6.1.1",
+    "@electron-forge/maker-zip": "^6.1.1",
     "electron": "^23.1.4"
   },
   "permissions": [
     "file:///*"
   ],
   "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
     "package.json": "^2.0.1"
+  },
+  "build": {  
+    "productName":"strongswan-sdk v1.0.0",
+    "appId": "xxxxx", 
+    "directories": {
+        "output": "build"
+    }, 
+    "extraResources":  [{
+        "from": "./config/config.json",
+        "to": "../config/config.json"
+    }],
+    "win": {  
+        "icon": "logos/icon.ico"
+    },
+    "dmg": {
+    	"contents": [
+    		{
+    			"x": 0,
+    			"y": 0,
+    			"path": "/Application"
+    		}
+    	]
+    },
+    "linux": {
+    	"icon": "logos/icon.ico",
+      "target": [
+        "AppImage"
+    ]
+    },
+    "mac": {
+    	"icon": "logos/icon.ico"
+    },
+    "nsis": {
+        "oneClick": false, 
+        "perMachine": false, 
+        "allowElevation": true, 
+        "allowToChangeInstallationDirectory": true, 
+        "installerIcon": "./logos/icon.ico",
+        "uninstallerIcon": "./logos/icon.ico", 
+        "installerHeaderIcon": "./logos/icon.ico", 
+        "createDesktopShortcut": true
+    },
+    "electronDownload":{
+      "mirror":"https://npm.taobao.org/mirrors/electron/"
+    }
   }
 }

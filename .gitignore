@@ -83,6 +83,10 @@ web_modules/
 .cache
 .parcel-cache
 
+
+# electron-builder.js build output
+build
+
 # Next.js build output
 .next
 out
