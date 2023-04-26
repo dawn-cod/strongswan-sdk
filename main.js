@@ -9,7 +9,7 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      conconfigStringIsolation: false,
+      contextIsolation: false,
       preload: path.join(__dirname, 'preload.js')
     }
   })
@@ -86,68 +86,135 @@ function execCommend(commend){
   });
   return runExec_start
 }
-//parser 重写
-function parseConfig(configString) {
-  configString = String(configString)
+//parser 重写 1 
+// function parseConfig(configString) {
+//   configString = String(configString)
+//   function commentClear(str){
+//     return str.replace(/#.+/g,"")
+//   }
+//   const configStringWithoutComment = commentClear(configString);
+//   const lines = configStringWithoutComment.split('\n');
+
+//   let result = {};
+//   let currentObject = result;
+//   let currentKey = null;
+  
+//   for (let i = 0; i < lines.length; i++) {
+//     const line = lines[i].trim();
+
+//     // Skip empty lines and comments
+//     if (line === "" || line.startsWith("#")) {
+//       continue;
+//     }
+
+//     // Check for opening and closing braces
+//     if (line.endsWith("{")) {
+//       const key = line.slice(0, -1).trim();
+//       currentKey = key;
+//       currentObject[key] = {};
+//       currentObject = currentObject[key];
+//     } else if (line === "}") {
+//       currentObject = result;
+//       currentKey = null;
+//     } else {
+//       // Parse key-value pairs
+//       const [key, value] = line.split("=");
+//       if (!key || !value) {
+//         throw new SyntaxError(`Invalid key-value pair: ${line}`);
+//       }
+
+//       // Trim whitespace from keys and values
+//       const trimmedKey = key.trim();
+//       const trimmedValue = value.trim();
+
+//       // Parse values as booleans or numbers if possible
+//       let parsedValue = trimmedValue;
+//       if (trimmedValue === "true") {
+//         parsedValue = true;
+//       } else if (trimmedValue === "false") {
+//         parsedValue = false;
+//       } else if (!isNaN(trimmedValue)) {
+//         parsedValue = parseFloat(trimmedValue);
+//       }
+
+//       // Set the key-value pair on the current object
+//       if (currentKey === null) {
+//         throw new SyntaxError(`No object to set key-value pair: ${line}`);
+//       }
+//       currentObject[trimmedKey] = parsedValue;
+//     }
+//   }
+
+//   return result;
+// }
+//parser 重写 2
+function parseConfig(configStr) {
+  let currentObj = {};
+  let currentKey = "";
+  let currentDepth = 0;
+  const stack = [];
+
   function commentClear(str){
     return str.replace(/#.+/g,"")
   }
-  const configStringWithoutComment = commentClear(configString);
-  const lines = configStringWithoutComment.split('\n');
-  return lines
-
-  let result = {};
-  let currentObject = result;
-  let currentKey = null;
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-
-    // Skip empty lines and comments
-    if (line === "" || line.startsWith("#")) {
+  function pushToStack(obj) {
+    if (stack.length > 0) {
+      const parentObj = stack[stack.length - 1];
+      if (Array.isArray(parentObj[currentKey])) {
+        parentObj[currentKey].push(obj);
+      } else {
+        parentObj[currentKey] = obj;
+      }
+    } else {
+      currentObj[currentKey] = obj;
+    }
+  }
+  configStrWithoutComment = commentClear(configStr)
+  const lines = configStrWithoutComment.split(/\r?\n/);
+  for (const line of lines) {
+    // Ignore comments and empty lines
+    if (!line.trim() || line.trim().startsWith("#")) {
       continue;
     }
 
-    // Check for opening and closing braces
-    if (line.endsWith("{")) {
-      const key = line.slice(0, -1).trim();
+    const match = line.match(/^(\s*)([^{\s]+)(?:\s*\{\s*)?$/);
+    if (match) {
+      // Found a new object
+      const key = match[2];
+      const depth = match[1].length / 3;
+      const obj = {};
+      pushToStack(obj);
+      stack.push(obj);
       currentKey = key;
-      currentObject[key] = {};
-      currentObject = currentObject[key];
-    } else if (line === "}") {
-      currentObject = result;
-      currentKey = null;
+      currentDepth = depth;
+    } else if (line.trim() === "}") {
+      // Finished parsing an object
+      stack.pop();
+      currentKey = "";
+      currentDepth = stack.length > 0 ? stack[stack.length - 1]._depth : 0;
     } else {
-      // Parse key-value pairs
-      const [key, value] = line.split("=");
-      if (!key || !value) {
-        throw new SyntaxError(`Invalid key-value pair: ${line}`);
-      }
-
-      // Trim whitespace from keys and values
-      const trimmedKey = key.trim();
-      const trimmedValue = value.trim();
-
-      // Parse values as booleans or numbers if possible
-      let parsedValue = trimmedValue;
-      if (trimmedValue === "true") {
-        parsedValue = true;
-      } else if (trimmedValue === "false") {
-        parsedValue = false;
-      } else if (!isNaN(trimmedValue)) {
-        parsedValue = parseFloat(trimmedValue);
-      }
-
-      // Set the key-value pair on the current object
-      if (currentKey === null) {
-        throw new SyntaxError(`No object to set key-value pair: ${line}`);
-      }
-      currentObject[trimmedKey] = parsedValue;
+      // Found a key-value pair
+      const parts = line.split("=").map((part) => part.trim());
+      const key = parts[0];
+      const value = parts.slice(1).join("=");
+      const depth = (line.match(/^\s*/) || [""])[0].length / 3;
+      const val = isNaN(value) ? value : parseFloat(value);
+      if (depth > currentDepth) {
+        const obj = {};
+        pushToStack(obj);
+        stack.push(obj);
+        currentKey = key;
+        currentDepth = depth;
+        pushToStack(val);
+      } else {
+        pushToStack(val);
+      }npm 
     }
   }
 
-  return result;
+  return currentObj;
 }
+
 
 //正则识别IP（配置修改方式一）
 function regLocalIp(string){
@@ -201,6 +268,7 @@ ipcMain.on('save_config', async (event, msg) => {
 
     // modified_data = jsonModify(data)
     // const json_config = JSON.parse(modified_data)
+
     const json_config = parseConfig(data);
     console.log('PARSE DONE: ', json_config)
     var a = json_config.connection.h2h.local;
