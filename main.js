@@ -162,7 +162,7 @@ ipcMain.on('save_config', async (event, msg) => {
     configobject.connections.h2h.remote_addrs = msg.RemoteIP;
     configobject.connections.h2h.local.id = msg.LocalID;
     configobject.connections.h2h.remote.id = msg.RemoteID;
-    configobject.connections.reauth_time = msg.reconnectGapSecond;
+    configobject.connections.h2h.children.h2h_child.rekey_time = msg.reconnectGapSecond;
     configstring = stringifyConfig(configobject);
     console.log("configstring is: \n", typeof(configstring));
     //write config to file
