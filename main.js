@@ -86,26 +86,115 @@ function execCommend(commend){
   });
   return runExec_start
 }
+
+
+//Specific Parses Functions
+
+function parseConfig(configStr){
+  const configObj = {};
+  let currentObj = configObj;
+  const lines = configStr.replace(/#.*/g,'').split('\n');
+  let stack = [];
+  
+  for (let line of lines) {
+    line = line.trim();
+    if (line === '' || line.startsWith('#')) {
+      continue;
+    } else if (line.endsWith('{')) {
+      //（待修正）下面两行改成正则
+      stack.push(currentObj)
+      let KEYwithobj = line.match(/(\w|-)+(?=\s*{)/g);
+      currentObj[KEYwithobj] = {};
+      currentObj = currentObj[KEYwithobj];
+    } else if (line === '}') {
+      currentObj = stack.pop();
+    } else {
+      //处理键值对
+      let [key, val] = line.split('=').map(item => item.trim());
+      currentObj[key] = val;
+    }
+  }
+  return configObj;
+}
+
+//Specific Stringify Functions
+function stringifyConfig(obj) {
+  const indent = "   ";
+  let result = "";
+
+  function buildString(val, depth) {
+    if (typeof val === "object" && !Array.isArray(val)) {
+      // Object keys should be sorted alphabetically
+      const keys = Object.keys(val).sort();
+      for (const key of keys) {
+        const value = val[key];
+        if (typeof value === "object") {
+          result += indent.repeat(depth) + key + " {\n";
+          buildString(value, depth + 1);
+          result += indent.repeat(depth) + "}\n";
+        } else {
+          result += indent.repeat(depth) + key + " = " + value + "\n";
+        }
+      }
+    } else if (Array.isArray(val)) {
+      for (const value of val) {
+        buildString(value, depth);
+      }
+    }
+  }
+
+  buildString(obj, 0);
+  return result;
+}
+
 //保存配置信息至本地
-ipcMain.on('save_config', async (e, msg) => {
-  console.log('main: ' + msg.localID);
-
-
+ipcMain.on('save_config', async (event, msg) => {
+  // console.log("msg is: \n", msg);
+  fs.readFile(path.join(__dirname,"./test.txt"),"utf8",(err,data)=>{
+    console.log("data is: \n", data);
+    if(err){
+      event.sender.send('read-file-reply', "Failure occurs when reading file");
+    }else{
+      event.sender.send('read-file-reply', data);
+    }
+    configobject = parseConfig(data);
+    configobject.connections.h2h.local_addrs = msg.LocalIP;
+    configobject.connections.h2h.remote_addrs = msg.RemoteIP;
+    configobject.connections.h2h.local.id = msg.LocalID;
+    configobject.connections.h2h.remote.id = msg.RemoteID;
+    configobject.connections.reauth_time = msg.reconnectGapSecond;
+    configstring = stringifyConfig(configobject);
+    console.log("configstring is: \n", typeof(configstring));
+    //write config to file
+    fs.writeFile(path.join(__dirname,"./test.txt"), configstring, 
+    {
+      encoding: "utf8",
+      flag: "w"
+    },
+    (err)=>{
+      if(err){
+        event.sender.send('write-file-reply', "Failure occurs when writing file");
+      }else{
+        event.sender.send('write-file-reply', "Success");
+        console.log("write-file-reply");
+      }
+    });
+    })
 });
 
 //文件读写（测试）
-ipcMain.on('read-file-msg', function(event, arg) {
-  // arg是从渲染进程返回来的数据
-  console.log(arg);
-  // 这里是传给渲染进程的数据
-  fs.readFile(path.join(__dirname,"./test.txt"),"utf8",(err,data)=>{
-  if(err){
-		event.sender.send('read-file-reply', "Failure occurs when reading file");
-	}else{
-		event.sender.send('read-file-reply', data);
-	}
-  })
-});
+// ipcMain.on('read-file-msg', function(event, arg) {
+//   // arg是从渲染进程返回来的数据
+//   console.log(arg);
+//   // 这里是传给渲染进程的数据
+//   fs.readFile(path.join(__dirname,"./test.txt"),"utf8",(err,data)=>{
+//   if(err){
+// 		event.sender.send('read-file-reply', "Failure occurs when reading file");
+// 	}else{
+// 		event.sender.send('read-file-reply', data);
+// 	}
+//   })
+// });
 
 //启动StrongSwan
 ipcMain.on('startStrongSwan', async (event, startTime) => {
