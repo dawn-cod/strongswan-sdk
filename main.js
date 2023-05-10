@@ -5,7 +5,7 @@ const path = require('path')
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
+    width: 1350,
     height: 600,
     webPreferences: {
       nodeIntegration: true,
@@ -46,15 +46,16 @@ app.on('window-all-closed', function () {
 const ipcMain = require('electron').ipcMain;
 const fs = require('fs')
 const exec = require('child_process').exec;
-const cmdPath = '/home/edward/桌面/NJUPT-NEXUS';
+const cmdPath = process.cwd();
+const configPath = "/usr/local/etc/swanctl/conf.d/swanctl.conf";
 
-//该函数用于执行命令
-function execCommend_Raw(commend){
+//该函数用于执行命令()
+function execCommend_Raw(commend, cmdir = cmdPath){
   const runExec = new Promise((resolve, reject) => {
     let res = '', err = '';
-    // 执行命令行，如果命令不需要路径，或就是项目根目录，则不需要cwd参数：
+    // 执行命令行，如果命令不需要路径 ，或就是项目根目录，则不需要cwd参数：
     // 不受child_process默认的缓冲区大小的使用方法，没参数也要写上{}：workerProcess = exec(cmdStr, {})
-    workerProcess = exec(commend, { cwd: cmdPath })
+    workerProcess = exec(commend, { cwd: cmdir })
     // 打印正常的后台可执行程序输出
     workerProcess.stdout.on('data', function (data) {
       res += data;
@@ -87,10 +88,9 @@ function execCommend(commend){
   return runExec_start
 }
 
-
 //Specific Parses Functions
-
 function parseConfig(configStr){
+  console.log(configStr);
   const configObj = {};
   let currentObj = configObj;
   const lines = configStr.replace(/#.*/g,'').split('\n');
@@ -101,7 +101,6 @@ function parseConfig(configStr){
     if (line === '' || line.startsWith('#')) {
       continue;
     } else if (line.endsWith('{')) {
-      //（待修正）下面两行改成正则
       stack.push(currentObj)
       let KEYwithobj = line.match(/(\w|-)+(?=\s*{)/g);
       currentObj[KEYwithobj] = {};
@@ -150,8 +149,8 @@ function stringifyConfig(obj) {
 //保存配置信息至本地
 ipcMain.on('save_config', async (event, msg) => {
   // console.log("msg is: \n", msg);
-  fs.readFile(path.join(__dirname,"./test.txt"),"utf8",(err,data)=>{
-    console.log("data is: \n", data);
+  fs.readFile(path.join(configPath),"utf8",(err,data)=>{
+    // console.log("====Raw config is====: \n", data, "\n============\n");
     if(err){
       event.sender.send('read-file-reply', "Failure occurs when reading file");
     }else{
@@ -164,9 +163,8 @@ ipcMain.on('save_config', async (event, msg) => {
     configobject.connections.h2h.remote.id = msg.RemoteID;
     configobject.connections.reauth_time = msg.reconnectGapSecond;
     configstring = stringifyConfig(configobject);
-    console.log("configstring is: \n", typeof(configstring));
     //write config to file
-    fs.writeFile(path.join(__dirname,"./test.txt"), configstring, 
+    fs.writeFile(path.join(configPath), configstring, 
     {
       encoding: "utf8",
       flag: "w"
@@ -182,31 +180,29 @@ ipcMain.on('save_config', async (event, msg) => {
     })
 });
 
-//文件读写（测试）
-// ipcMain.on('read-file-msg', function(event, arg) {
-//   // arg是从渲染进程返回来的数据
-//   console.log(arg);
-//   // 这里是传给渲染进程的数据
-//   fs.readFile(path.join(__dirname,"./test.txt"),"utf8",(err,data)=>{
-//   if(err){
-// 		event.sender.send('read-file-reply', "Failure occurs when reading file");
-// 	}else{
-// 		event.sender.send('read-file-reply', data);
-// 	}
-//   })
-// });
 
 //启动StrongSwan
 ipcMain.on('startStrongSwan', async (event, startTime) => {
-  console.log('starttime=', startTime);
-  if (startTime - new Date() < 0){
-    console.log("输入时间早于当前时间！")
-  }
-  // 到规定时间后启动strongSwan
-  execCommend('sudo ipsec start');
-  execCommend('sudo swanctl --load-all');
+  var runExec_start = execCommend_Raw('sudo ipsec start')
+  runExec_start.then(({ err, res }) => {
+    event.sender.send('msg-reply', res);
+  }).catch((err) => {
+    console.error(err);
+  });
+  var runExec_start = execCommend_Raw('sudo swanctl --load-all')
+  runExec_start.then(({ err, res }) => {
+    event.sender.send('msg-reply', res);
+  }).catch((err) => {
+    console.error(err);
+  });
   setTimeout(() => {
-    execCommend('sudo ipsec up h2h');
+    console.log('starting connection...')
+    var runExec_start = execCommend_Raw('sudo ipsec up h2h')
+    runExec_start.then(({ err, res }) => {
+      event.sender.send('msg-reply', res);
+    }).catch((err) => {
+      console.error(err);
+    });
     }, startTime - new Date())
 })
 
