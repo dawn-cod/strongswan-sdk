@@ -1,11 +1,14 @@
 {
   "name": "strongswan-sdk",
   "version": "1.0.0",
-  "description": "",
+  "description": "A GUI for strongswan",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "package-win": "electron-packager . HelloWorld --platform=win32 --electron-version=10.0.0 --arch=x64 --download.mirrorOptions.mirror=https://npm.taobao.org/mirrors/electron/ --asar --app-version=0.0.0 --build-version=0.0.0 --out=HelloWorld --overwrite --no-package-manager --ignore='(.git)' --icon=assets/img/logo.ico",
+    "package-linux": "electron-packager . HelloWorld --platform=linux --electron-version=10.0.0 -no-sandbox --arch=x64 --download.mirrorOptions.mirror=https://npm.taobao.org/mirrors/electron/ --asar --app-version=0.0.0 --build-version=0.0.0 --out=HelloWorld --overwrite --no-package-manager --ignore='(.git)' --icon=assets/img/logo.png",
+    "package-mac": "electron-packager . HelloWorld --platform=darwin --electron-version=10.0.0 --arch=x64 --download.mirrorOptions.mirror=https://npm.taobao.org/mirrors/electron/ --asar --app-version=0.0.0 --build-version=0.0.0 --out=HelloWorld --overwrite --no-package-manager --ignore='(.git)' --icon=assets/img/logo.ico"
   },
   "repository": {
     "type": "git",
@@ -19,7 +22,8 @@
   "homepage": "https://github.com/dawn-cod/strongswan-sdk#readme",
   "devDependencies": {
     "@electron-forge/cli": "^6.0.5",
-    "electron": "^23.3.1"
+    "electron": "^23.3.1",
+    "electron-packager": "^17.1.1"
   },
   "permissions": [
     "file:///*"

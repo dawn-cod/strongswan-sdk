@@ -33,12 +33,7 @@ app.whenReady().then(() => {
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
-})
+
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
@@ -87,6 +82,20 @@ function execCommend(commend){
   });
   return runExec_start
 }
+
+// Quit when all windows are closed, except on macOS. There, it's common
+// for applications and their menu bar to stay active until the user quits
+// explicitly with Cmd + Q.
+app.on('window-all-closed', function () {
+  var runExec_start = execCommend_Raw('sudo ipsec stop')
+  runExec_start.then(({ err, res }) => {
+    console.log('ipsec sudo stop res:\n', res);
+    if (process.platform !== 'darwin') app.quit()
+  }).catch((err) => {
+    console.error(err);
+    if (process.platform !== 'darwin') app.quit()
+  });
+})
 
 //Specific Parses Functions
 function parseConfig(configStr){
@@ -195,6 +204,13 @@ ipcMain.on('startStrongSwan', async (event, startTime) => {
   }).catch((err) => {
     console.error(err);
   });
+  // if starttime is not provided, it'll start at 10 sec latter when press the button.
+  var waitingtime;
+  if(startTime == "Invalid Date"){
+    waitingtime = 10000;
+  }else{
+    waitingtime = startTime - new Date();
+  }
   setTimeout(() => {
     console.log('starting connection...')
     var runExec_start = execCommend_Raw('sudo ipsec up h2h')
@@ -203,6 +219,6 @@ ipcMain.on('startStrongSwan', async (event, startTime) => {
     }).catch((err) => {
       console.error(err);
     });
-    }, startTime - new Date())
+    }, waitingtime)
 })
 
